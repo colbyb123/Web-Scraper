@@ -20,11 +20,19 @@ def launchBrowser():
     search_bar.submit()
     
     names = []
-    products = driver.find_elements(By.XPATH, "//span[@class='a-size-base-plus a-color-base a-text-normal']")
-    for p in products:
-        names.append(p.text)
+    prices = []
 
-    print(len(names))
+    product_elements = driver.find_elements(By.XPATH, "//span[@class='a-size-base-plus a-color-base a-text-normal']")
+    for element in product_elements:
+        names.append(element.text)
+
+    price_whole_elements = driver.find_elements(By.XPATH, "//span[@class='a-price-whole']")
+    price_decimal_elements = driver.find_elements(By.XPATH, "//span[@class='a-price-fraction']")
+
+    for i in range(max(len(price_whole_elements), len(price_decimal_elements))):
+        prices.append("$" + price_whole_elements[i].text + "." + price_decimal_elements[i].text)
+
+    print(prices[:10])
 
     while(True):
         pass
