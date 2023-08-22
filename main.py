@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
-from time import sleep
+import pandas as pd
 
 def launchBrowser():
     #Get user input
@@ -19,22 +19,40 @@ def launchBrowser():
     search_bar.send_keys(search)
     search_bar.submit()
     
+    search_results = driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')
+
     names = []
     prices = []
 
-    product_elements = driver.find_elements(By.XPATH, "//span[@class='a-size-base-plus a-color-base a-text-normal']")
-    for element in product_elements:
-        names.append(element.text)
+    for result in search_results:
+        try:
+            if len(result.find_elements(By.XPATH,".//span[@class='a-size-base-plus a-color-base a-text-normal']"))>0:
+                result_name = result.find_element(By.XPATH,".//span[@class='a-size-base-plus a-color-base a-text-normal']")
 
-    price_whole_elements = driver.find_elements(By.XPATH, "//span[@class='a-price-whole']")
-    price_decimal_elements = driver.find_elements(By.XPATH, "//span[@class='a-price-fraction']")
+            elif len(result.find_elements(By.XPATH,".//span[@class='a-size-medium a-color-base a-text-normal']"))>0:
+                result_name = result.find_element(By.XPATH,".//span[@class='a-size-medium a-color-base a-text-normal']")
+            
+            names.append(result_name.text)
 
-    for i in range(max(len(price_whole_elements), len(price_decimal_elements))):
-        prices.append("$" + price_whole_elements[i].text + "." + price_decimal_elements[i].text)
+        except:
+            pass
 
-    print(prices[:10])
+        try:
+            if len(result.find_elements(By.XPATH,".//span[@class='a-price-whole']"))>0:
+                result_price = result.find_element(By.XPATH,".//span[@class='a-price-whole']")
+                prices.append(result_price.text)
 
-    while(True):
+            else:
+                prices.append("0")
+                
+        except:
+            pass
+
+    print(len(names), len(prices))
+    df = pd.DataFrame({"Product Names": names, "Prices": prices})
+    df.to_excel(r"C:\Users\colby\Desktop\Web-Scraper-1\list.xlsx")
+
+    while True:
         pass
-   
+
 launchBrowser()
